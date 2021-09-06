@@ -318,7 +318,7 @@ from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X,
                                                     y,
                                                     test_size=0.2,
-                                                    random_state=43)
+                                                    random_state=443)
 
 X_train
 
@@ -491,4 +491,197 @@ plt.xlabel('Sequence Length')
 plt.savefig('plots/test_padded_sequence_length.png',
             facecolor='white')
 plt.show()
+
+# LSTM network arcitecture hyperparameters
+
+# SpatialDropout1D is used to dropout the embedding layer
+# The SpatialDropout1D helps to drop entire 1D feature maps instead of
+# individual elements.
+dropout_rate = 0.2
+
+# n_lstm is the number of nodes in the hidden layers within the LSTM cell
+no_of_nodes = 20
+
+# return_sequences=True ensures that the LSTM cell returns all of the
+# outputs from the unrolled LSTM cell through time. If this argument is
+# not used, the LSTM cell will simply provide the output of the LSTM cell
+# from the previous step.
+
+# 
+embedding_dimension = 16
+
+# 
+no_of_epochs = 30
+
+# 
+vocabulary_size = 500
+
+# 
+from tensorflow.keras.models import Sequential
+
+# 
+from tensorflow.keras.layers import Embedding
+
+# 
+from tensorflow.keras.layers import LSTM
+
+# 
+from tensorflow.keras.layers import Dense
+
+# LSTM model architecture
+
+lstm_model = Sequential()
+
+lstm_model.add(Embedding(vocabulary_size,
+                         embedding_dimension,
+                         input_length=maximum_length))
+
+lstm_model.add(LSTM(no_of_nodes,
+                    dropout=dropout_rate,
+                    return_sequences=True))
+
+lstm_model.add(LSTM(no_of_nodes,
+                    dropout=dropout_rate,
+                    return_sequences=True))
+
+lstm_model.add(Dense(1,
+                     activation='sigmoid'))
+
+lstm_model.compile(loss='binary_crossentropy',
+                   optimizer='adam',
+                   metrics=['accuracy'])
+
+# printing a string summary of the network
+lstm_model.summary()
+
+# 
+from tensorflow.keras.callbacks import EarlyStopping
+
+early_stopping = EarlyStopping(monitor='val_loss',
+                               patience=5)
+
+history = lstm_model.fit(X_train_padded,
+                         y_train,
+                         epochs=no_of_epochs,
+                         validation_data=(X_test_padded, y_test),
+                         callbacks=[early_stopping],
+                         verbose=2)
+
+lstm_path = 'models/lstm_model.h5'
+lstm_model.save(lstm_path)
+
+from tensorflow.keras.models import load_model
+
+loaded_lstm_model = load_model(lstm_path)
+
+loaded_lstm_model.evaluate(X_test_padded,
+                           y_test)
+
+def preprocess_text(sms_messages):
+    sequence_ = tokenizer.texts_to_sequences(sms_messages)
+    padded_sequence = pad_sequences(sequence_,
+                                    maxlen=maximum_length,
+                                    padding=padding_type,
+                                    truncating=truncating_type)
+    return padded_sequence
+
+sms_messages = ['IMPORTANT - You could be entitled up to £3,160 in compensation from mis-sold PPI on a credit card or loan. Please reply PPI for info or STOP to opt out.',
+                'Hello, Janith! Did you go to the school yesterday? If you did, can you please send me the notes of all the subjects?',
+                'Congratulations ur awarded 500 of CD vouchers or 125 gift guaranteed & Free entry 2 100 wkly draw txt MUSIC to 87066.',
+                'A loan for £950 is approved for you if you receive this SMS. 1 min verification & cash in 1 hr at www.abc.co.uk to opt out reply stop',
+                'If he started searching, he will get job in few days. He has great potential and talent.',
+                'One chance ONLY! Had your mobile 11mths+? You are entitled to update to the latest colour camera mobile for FREEE! Call The Mobile Update Co FREE on 08002986906.',
+                'Valentines Day Special! Win over 1000 USD in cash in our quiz and take your partner on the trip of a lifetime! Send GO to 83600 now. 150 p/msg rcvd.',
+                'Now I am better. Made up for Friday and stuffed myself like a pig yesterday. Now I feel bad.',
+                'I got another job! The one at the hospital, doing data analysis or something, starts on Monday! Not sure when my thesis will finish.']
+
+padded_sequences = preprocess_text(sms_messages)
+
+for index, sms_message in enumerate(sms_messages):
+  prediction = loaded_lstm_model.predict(padded_sequences)[index][0][0]
+  if prediction > 0.5:
+    print('SPAM - ', prediction, '-', sms_message)
+  else:
+    print('HAM  - ', prediction, '-', sms_message)
+
+# Densely Connected CNN (DenseNet) arcitecture hyperparameters
+
+# 
+dropout_rate = 0.2
+
+# 
+embedding_dimension = 16
+
+# 
+no_of_epochs = 30
+
+# 
+vocabulary_size = 500
+
+# 
+from tensorflow.keras.models import Sequential
+
+# 
+from tensorflow.keras.layers import Embedding
+
+# 
+from tensorflow.keras.layers import GlobalAveragePooling1D
+
+# 
+from tensorflow.keras.layers import Dropout
+
+# 
+from tensorflow.keras.layers import Dense
+
+# Densely Connected CNN (DenseNet) model architecture
+
+densenet_cnn_model = Sequential()
+
+densenet_cnn_model.add(Embedding(vocabulary_size,
+                                 embedding_dimension,
+                                 input_length=maximum_length))
+
+densenet_cnn_model.add(GlobalAveragePooling1D())
+
+densenet_cnn_model.add(Dense(24,
+                             activation='relu'))
+
+densenet_cnn_model.add(Dropout(dropout_rate))
+
+densenet_cnn_model.add(Dense(1,
+                             activation='sigmoid'))
+
+densenet_cnn_model.compile(loss='binary_crossentropy',
+                           optimizer='adam',
+                           metrics=['accuracy'])
+
+# printing a string summary of the network
+densenet_cnn_model.summary()
+
+early_stopping = EarlyStopping(monitor='val_loss',
+                               patience=5)
+
+history = densenet_cnn_model.fit(X_train_padded,
+                                 y_train,
+                                 epochs=no_of_epochs,
+                                 validation_data=(X_test_padded, y_test),
+                                 callbacks=[early_stopping],
+                                 verbose=2)
+
+densenet_cnn_path = 'models/densenet_cnn_model.h5'
+densenet_cnn_model.save(densenet_cnn_path)
+
+loaded_densenet_cnn_model = load_model(densenet_cnn_path)
+
+loaded_densenet_cnn_model.evaluate(X_test_padded,
+                                   y_test)
+
+padded_sequences = preprocess_text(sms_messages)
+
+for index, sms_message in enumerate(sms_messages):
+  prediction = loaded_densenet_cnn_model.predict(padded_sequences)[index][0]
+  if prediction > 0.5:
+    print('SPAM - ', prediction, '-', sms_message)
+  else:
+    print('HAM  - ', prediction, '-', sms_message)
 
