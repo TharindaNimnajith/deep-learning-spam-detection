@@ -1499,7 +1499,7 @@ loaded_densenet_cnn_model = load_model(densenet_cnn_path)
 loaded_densenet_cnn_model
 
 
-# # CNN Model Evaluation
+# # Densely Connected CNN (DenseNet) Model Evaluation
 
 # In[122]:
 
