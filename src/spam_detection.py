@@ -428,7 +428,7 @@ plt.show()
 # observations from the majority class so that the numbers in majority
 # and minority classes are matched
 # after downsampling the ham messages (majority class), there are now
-# 747 messages in each class
+# 653 messages in each class
 downsampled_ham_dataframe = ham_dataframe.sample(n=len(spam_dataframe),
                                                  random_state=44)
 downsampled_ham_dataframe
