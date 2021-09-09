@@ -934,11 +934,11 @@ plt.show()
 # linear transformation of the inputs
 dropout_rate = 0.2
 
-# n_lstm indicates the number of nodes in the hidden layers within the
-# LSTM cell
+# no_of_nodes indicates the number of nodes in the hidden layers within
+# the LSTM cell
 no_of_nodes = 20
 
-# embedding dimension indicates the dimension of the state space used for
+# embedding_dimension indicates the dimension of the state space used for
 # reconstruction
 embedding_dimension = 16
 
@@ -1313,7 +1313,7 @@ plt.show()
 # linear transformation of the inputs
 dropout_rate = 0.2
 
-# embedding dimension indicates the dimension of the state space used for
+# embedding_dimension indicates the dimension of the state space used for
 # reconstruction
 embedding_dimension = 16
 
