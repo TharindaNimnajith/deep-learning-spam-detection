@@ -1136,8 +1136,6 @@ loaded_lstm_model
 
 
 # evaluating the LSTM model performance on test data
-# validation loss = 0.21674150228500366
-# validation accuracy = 0.930610716342926
 loaded_lstm_model.evaluate(X_test_padded,
                            y_test)
 
@@ -1505,8 +1503,6 @@ loaded_densenet_cnn_model
 
 
 # evaluating the DenseNet CNN model performance on test data
-# validation loss = 0.11119994521141052
-# validation accuracy = 0.9732824563980103
 loaded_densenet_cnn_model.evaluate(X_test_padded,
                                    y_test)
 
@@ -1766,7 +1762,7 @@ plt.plot(list(range(len(sms_messages))),
          marker='o')
 plt.plot(list(range(len(sms_messages))),
          densenet_cnn_prediction,
-         label='CNN',
+         label='DenseNet',
          color='red',
          marker='o')
 plt.plot(list(range(len(sms_messages))),
@@ -1777,13 +1773,85 @@ plt.title('Comparison of Predicted Values by LSTM and DenseNet Models')
 plt.xlabel('SMS Message ID')
 plt.ylabel('Predicted Value')
 plt.legend(loc='upper right',
-           bbox_to_anchor=(1, 1))
+           bbox_to_anchor=(1.02, 1))
 plt.savefig('plots/prediction_values_comparison.png',
             facecolor='white')
 plt.show()
 
 
 # In[140]:
+
+
+# importing roc_curve function from metrics package in scikit-learn
+# library
+from sklearn.metrics import roc_curve
+
+# Receiver Operating Characteristic (ROC) metric to evaluate classifier
+# output quality
+# the ROC curve shows the trade-off between sensitivity (or TPR) and
+# specificity (1 – FPR)
+# classifiers that give curves closer to the top-left corner indicate
+# a better performance
+# the closer the curve comes to the 45-degree diagonal of the ROC space,
+# the less accurate the test
+
+false_positive_rate_lstm, true_positive_rate_lstm, threshold_lstm = roc_curve(y_test,
+                                                                              y_pred_lstm)
+
+false_positive_rate_densenet_cnn, true_positive_rate_densenet_cnn, threshold_densenet_cnn = roc_curve(y_test,
+                                                                                                      y_pred_densenet_cnn)
+
+print('LSTM - False Positive Rate (FPR):', false_positive_rate_lstm)
+print('LSTM - True Positive Rate (TPR):', true_positive_rate_lstm)
+print('LSTM - Threshold:', threshold_lstm)
+
+print('DenseNet - False Positive Rate (FPR):', false_positive_rate_lstm)
+print('DenseNet - True Positive Rate (TPR):', true_positive_rate_densenet_cnn)
+print('DenseNet - Threshold:', threshold_densenet_cnn)
+
+
+# In[141]:
+
+
+from sklearn.metrics import auc
+
+# Area Under the Curve (AUC) is used for computing the area under
+# the ROC-curve
+
+area_under_curve_lstm = auc(false_positive_rate_lstm,
+                            true_positive_rate_lstm)
+
+area_under_curve_densenet_cnn = auc(false_positive_rate_densenet_cnn,
+                                    true_positive_rate_densenet_cnn)
+
+print('LSTM - Area Under Curve (AUC):', area_under_curve_lstm)
+print('DenseNet - Area Under Curve (AUC):', area_under_curve_densenet_cnn)
+
+
+# In[142]:
+
+
+# plotting the ROC curves for LSTM and DenseNet models
+plt.figure(1)
+plt.plot([0, 1],
+         [0, 1],
+         'k--')
+plt.plot(false_positive_rate_lstm,
+         true_positive_rate_lstm,
+         label='LSTM (area = {:.3f})'.format(area_under_curve_lstm))
+plt.plot(false_positive_rate_densenet_cnn,
+         true_positive_rate_densenet_cnn,
+         label='DenseNet (area = {:.3f})'.format(area_under_curve_densenet_cnn))
+plt.xlabel('False Positive Rate (FPR)')
+plt.ylabel('True Positive Rate (TPR)')
+plt.title('ROC Curve')
+plt.legend(loc='best')
+plt.savefig('plots/roc_curve.png',
+            facecolor='white')
+plt.show()
+
+
+# In[143]:
 
 
 # importing recall_score from scikit-learn library
@@ -1804,7 +1872,7 @@ mae = {}
 
 y_pred_dict = {
     'LSTM': y_pred_lstm,
-    'CNN': y_pred_densenet_cnn
+    'DenseNet': y_pred_densenet_cnn
 }
 
 for y_pred in y_pred_dict:
@@ -1854,7 +1922,7 @@ print('RMSE:', rmse)
 print('MAE:', mae)
 
 
-# In[141]:
+# In[144]:
 
 
 # sorting the accuracy scores of two deep learning models in
@@ -1864,7 +1932,7 @@ sorted(accuracy.items(),
        reverse=True)
 
 
-# In[142]:
+# In[145]:
 
 
 # plotting the accuracy comparison bar chart for the two
@@ -1881,7 +1949,7 @@ plt.savefig('plots/accuracy_comparison.png',
 plt.show()
 
 
-# In[143]:
+# In[146]:
 
 
 # defining a function to plot a bar chart with multiple bars
@@ -1909,7 +1977,7 @@ def bar_plot(ax,
                   data.keys())
 
 
-# In[144]:
+# In[147]:
 
 
 # plotting the algorithm comparison chart for all evaluation metrics
@@ -1941,7 +2009,7 @@ plt.savefig('plots/algorithm_comparison.png',
 plt.show()
 
 
-# In[144]:
+# In[147]:
 
 
 
